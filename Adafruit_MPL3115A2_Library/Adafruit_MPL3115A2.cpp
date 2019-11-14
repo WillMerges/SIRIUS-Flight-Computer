@@ -21,6 +21,7 @@
  *  @section author Author
  *
  *  Written by Kevin "KTOWN" Townsend for Adafruit Industries.
+ *  Edited by Will Merges
  *
  *  @section license License
  *

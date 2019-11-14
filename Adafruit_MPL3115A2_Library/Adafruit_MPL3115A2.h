@@ -13,6 +13,7 @@
  * products from Adafruit!
  *
  * Written by Kevin "KTOWN" Townsend for Adafruit Industries.
+ * Edited by Will Merges   
  *
  * BSD license, all text here must be included in any redistribution.
  *
