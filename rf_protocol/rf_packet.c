@@ -40,6 +40,8 @@ union rf_data_u {
 #define RF_DATA_PACKET
 #include "rf_packet.h"
 
+// general functions
+//
 rf_data create_packet() {
         struct rf_data_s data;
         data.start_byte = START_BYTE;
@@ -60,6 +62,45 @@ rf_data destroy_packet(rf_data packet) {
     free(packet);
 }
 
+// adding data functions
+//
+void add_alt(rf_data packet, float alt) {
+    packet->data.alt = alt;
+    packet->data.update_mask |= 2^ALT_POS; //bit 0
+}
+
+void add_lat(rf_data packet, float lat) {
+    packet->data.lat = lat;
+    packet->data.update_mask |= 2^LAT_POS; //bit 1
+}
+
+void add_long(rf_data packet, float long) {
+    packet->data.long = long;
+    packet->data.update_mask |= 2^LONG_POS; //bit 2
+}
+
+void add_alt_gps(rf_data packet, float alt) {
+    packet->data.alt_gps = alt;
+    packet->data.update_mask |= 2^ALT_GPS_POS; //bit 3
+}
+//TODO finish these
+void add_200g_accel(rf_data, int x, int y, int z);
+void add_16g_accel(rf_data, float x, float y, float z);
+void add_16_mag(rf_data, float x, float y, float z);
+void add_pitch(rf_data, float pitch);
+void add_roll(rf_data, float roll);
+void add_uptime(rf_data, int seconds);
+void add_time_since_accel(rf_data, int seconds);
+void add_temp1(rf_data, int temp);
+void add_temp2(rf_data, int temp);
+void set_charge1(rf_data, _Bool active);
+void set_charge2(rf_data, _Bool active);
+void set_charge3(rf_data, _Bool active);
+void set_charge4(rf_data, _Bool active);
+
+// retrieving data functions
+//
+//TODO
 
 // currently for testing with sizeof only
 int main(int argc, char argv[][argc]) {

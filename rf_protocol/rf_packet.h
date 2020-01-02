@@ -6,6 +6,13 @@
 // rightward carrot!
 #define START_BYTE 0x3E
 
+// update field bit positions
+#define ALT_POS 0
+#define LAT_POS 1
+#define LONG_POS 2
+#define ALTGPS_POS 3
+//TODO finish these
+
 #ifndef RF_DATA_PACKET
 union rf_data_u {};
 #endif
@@ -18,23 +25,23 @@ rf_data destroy_packet(rf_data);
 rf_data clear_packet(rf_data);
 
 // functions that add data to packet
-rf_data add_alt(float alt);
-rf_data add_lat(float lat);
-rf_data add_long(float lon);
-rf_data add_alt_gps(float alt);
-rf_data add_200g_accel(int x, int y, int z);
-rf_data add_16g_accel(float x, float y, float z);
-rf_data add_16_mag(float x, float y, float z);
-rf_data add_pitch(float pitch);
-rf_data add_roll(float roll);
-rf_data add_uptime(int seconds);
-rf_data add_time_since_accel(int seconds);
-rf_data add_temp1(int temp);
-rf_data add_temp2(int temp);
-rf_data set_charge1(_Bool active);
-rf_data set_charge2(_Bool active);
-rf_data set_charge3(_Bool active);
-rf_data set_charge4(_Bool active);
+void add_alt(rf_data, float alt);
+void add_lat(rf_data, float lat);
+void add_long(rf_data, float long);
+void add_alt_gps(rf_data, float alt);
+void add_200g_accel(rf_data, int x, int y, int z);
+void add_16g_accel(rf_data, float x, float y, float z);
+void add_16_mag(rf_data, float x, float y, float z);
+void add_pitch(rf_data, float pitch);
+void add_roll(rf_data, float roll);
+void add_uptime(rf_data, int seconds);
+void add_time_since_accel(rf_data, int seconds);
+void add_temp1(rf_data, int temp);
+void add_temp2(rf_data, int temp);
+void set_charge1(rf_data, _Bool active);
+void set_charge2(rf_data, _Bool active);
+void set_charge3(rf_data, _Bool active);
+void set_charge4(rf_data, _Bool active);
 
 // functions that get data from packet
 float get_alt(rf_data);
