@@ -27,7 +27,7 @@ rf_data clear_packet(rf_data);
 // functions that add data to packet
 void add_alt(rf_data, float alt);
 void add_lat(rf_data, float lat);
-void add_long(rf_data, float long);
+void add_long(rf_data, float lon);
 void add_alt_gps(rf_data, float alt);
 void add_200g_accel(rf_data, int x, int y, int z);
 void add_16g_accel(rf_data, float x, float y, float z);

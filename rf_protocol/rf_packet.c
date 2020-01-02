@@ -74,14 +74,14 @@ void add_lat(rf_data packet, float lat) {
     packet->data.update_mask |= 2^LAT_POS; //bit 1
 }
 
-void add_long(rf_data packet, float long) {
-    packet->data.long = long;
+void add_long(rf_data packet, float lon) {
+    packet->data.lon = lon;
     packet->data.update_mask |= 2^LONG_POS; //bit 2
 }
 
 void add_alt_gps(rf_data packet, float alt) {
     packet->data.alt_gps = alt;
-    packet->data.update_mask |= 2^ALT_GPS_POS; //bit 3
+    packet->data.update_mask |= 2^ALTGPS_POS; //bit 3
 }
 //TODO finish these
 void add_200g_accel(rf_data, int x, int y, int z);
