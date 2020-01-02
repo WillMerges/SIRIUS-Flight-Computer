@@ -26,7 +26,7 @@ struct rf_data_s {
     int temp1;
     int temp2;
     uint8_t charges : 4;
-    uint32_t update_mask : 19;
+    uint32_t update_mask : 14;
 };
 // each struct member is a bit in update_mask
 // ex. alt is bit 0 (least significant)
@@ -59,46 +59,99 @@ rf_data destroy_packet(rf_data packet) {
 
 // adding data functions
 //
+update_bit_pos update_pos;
 void add_alt(rf_data packet, float alt) {
     packet->data.alt = alt;
-    packet->data.update_mask |= 2^ALT_POS; //bit 0
+    update_pos = ALT;
+    packet->data.update_mask |= 2^update_pos; //bit 0
 }
 
 void add_lat(rf_data packet, float lat) {
     packet->data.lat = lat;
-    packet->data.update_mask |= 2^LAT_POS; //bit 1
+    update_pos = LAT;
+    packet->data.update_mask |= 2^update_pos; //bit 1
 }
 
 void add_long(rf_data packet, float lon) {
     packet->data.lon = lon;
-    packet->data.update_mask |= 2^LONG_POS; //bit 2
+    update_pos = LONG;
+    packet->data.update_mask |= 2^update_pos; //bit 2
 }
 
 void add_alt_gps(rf_data packet, float alt) {
     packet->data.alt_gps = alt;
-    packet->data.update_mask |= 2^ALTGPS_POS; //bit 3
+    update_pos = ALTGPS;
+    packet->data.update_mask |= 2^update_pos; //bit 3
 }
-//TODO finish these
-void add_200g_accel(rf_data, int x, int y, int z);
-void add_16g_accel(rf_data, float x, float y, float z);
-void add_16_mag(rf_data, float x, float y, float z);
-void add_pitch(rf_data, float pitch);
-void add_roll(rf_data, float roll);
-void add_uptime(rf_data, int seconds);
-void add_time_since_accel(rf_data, int seconds);
-void add_temp1(rf_data, int temp);
-void add_temp2(rf_data, int temp);
-void set_charge1(rf_data, _Bool active);
-void set_charge2(rf_data, _Bool active);
-void set_charge3(rf_data, _Bool active);
-void set_charge4(rf_data, _Bool active);
+
+void add_200g_accel(rf_data packet, int x, int y, int z) {
+    packet->data.x200g = x;
+    packet->data.y200g = y;
+    packet->data.z200g = z;
+    update_pos = A200G;
+    packet->data.update_mask |= 2^update_pos; //bit 4
+}
+
+void add_16g_accel(rf_data packet, float x, float y, float z) {
+    packet->data.x16g = x;
+    packet->data.y16g = y;
+    packet->data.z16g = z;
+    update_pos = A16G;
+    packet->data.update_mask |= 2^update_pos; //bit 5
+}
+
+void add_16_mag(rf_data packet, float x, float y, float z) {
+    packet->data.x16mag = x;
+    packet->data.y16mag = y;
+    packet->data.z16mag = z;
+    update_pos = MAG16G;
+    packet->data.update_mask |= 2^update_pos; //bit 6
+}
+
+void add_pitch(rf_data packet, float pitch) {
+    packet->data.pitch = pitch;
+    update_pos = PITCH;
+    packet->data.update_mask |= 2^PITCH; //bit 7
+}
+
+void add_roll(rf_data packet, float roll) {
+    packet->data.roll = roll;
+    update_pos = ROLL;
+    packet->data.update_mask |= 2^update_pos; //bit 8
+}
+
+void add_uptime(rf_data packet, int seconds) {
+    packet->data.uptime = seconds;
+    update_pos = UPTIME;
+    packet->data.update_mask |= 2^UPTIME; //bit 9
+}
+
+void add_time_since_accel(rf_data packet, int seconds) {
+    packet->data.time_since_accel = seconds;
+    update_pos = TIMEACCEL;
+    packet->data.update_mask |= 2^update_pos; //bit 10
+}
+
+void add_temp1(rf_data packet, int temp) {
+    packet->data.temp1 = temp;
+    update_pos = TEMP1;
+    packet->data.update_mask |= 2^update_pos; //bit 11
+}
+
+void add_temp2(rf_data packet, int temp) {
+    packet->data.temp2 = temp;
+    update_pos = TEMP2;
+    packet->data.update_mask |= 2^update_pos; //bit 12
+}
+
+// charges ordered from 0-3
+void set_charge(rf_data, int charge, _Bool active) {
+    uint8_t mask = 1 << charge;
+    packet->data.charges |= mask;
+    update_pos = CHARGES;
+    packet->data.update_mask |= 2^update_pos;
+}
 
 // retrieving data functions
 //
 //TODO
-
-// currently for testing with sizeof only
-int main(int argc, char argv[][argc]) {
-    rf_data packet = create_packet();
-    printf("%lu", sizeof(packet->data));
-}

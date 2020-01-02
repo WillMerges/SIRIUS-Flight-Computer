@@ -6,12 +6,8 @@
 // rightward carrot!
 #define START_BYTE 0x3E
 
-// update field bit positions
-#define ALT_POS 0
-#define LAT_POS 1
-#define LONG_POS 2
-#define ALTGPS_POS 3
-//TODO finish these
+typedef enum {ALT, LAT, LONG, ALTGPS, A200G, A16G, MAG16G, PITCH, \
+              ROLL, UPTIME, TIMEACCEL, TEMP1, TEMP2, CHARGES} update_bit_pos;
 
 #ifndef RF_DATA_PACKET
 struct rf_data_s {};
@@ -43,10 +39,7 @@ void add_uptime(rf_data, int seconds);
 void add_time_since_accel(rf_data, int seconds);
 void add_temp1(rf_data, int temp);
 void add_temp2(rf_data, int temp);
-void set_charge1(rf_data, _Bool active);
-void set_charge2(rf_data, _Bool active);
-void set_charge3(rf_data, _Bool active);
-void set_charge4(rf_data, _Bool active);
+void set_charge(rf_data, int charge, _Bool active);
 
 // functions that get data from packet
 float get_alt(rf_data);
