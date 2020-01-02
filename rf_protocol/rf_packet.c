@@ -2,10 +2,12 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/types.h>
+#include <string.h>
 
 #pragma pack(1)
 struct rf_data_s {
     uint8_t start_byte;
+    uint16_t update_mask : 14;
     float alt;
     float lat;
     float lon;
@@ -26,7 +28,6 @@ struct rf_data_s {
     int temp1;
     int temp2;
     uint8_t charges : 4;
-    uint32_t update_mask : 14;
 };
 // each struct member is a bit in update_mask
 // ex. alt is bit 0 (least significant)
@@ -57,31 +58,59 @@ rf_data destroy_packet(rf_data packet) {
     free(packet);
 }
 
+// the packet will NOT be able to be accessed after reducing
+// this functions should be changed if packet changes
+// modifies the serialized attribute
+// returns number of bytes packet is
+size_t reduce_packet(rf_data packet) {
+    int c = 3;
+    int j = 0;
+    for(int i=3; i < sizeof(*packet); i+=4) {;
+        if(packet->data.update_mask & (1 << j)) {
+            if(i == 79) {
+                packet->serialized[c] = packet->serialized[i];
+                c++;
+            } else { //this might break if endianness switches
+                memcpy(packet->serialized+c, packet->serialized+i, 4);
+                c += 4;
+            }
+        }
+        if(i == 19 || i == 31 || i == 43) {
+            i += 8;
+        }
+        j++;
+    }
+#ifdef DEBUG
+    printf("\npacket reduced to size: %d\n", c);
+#endif
+    return c;
+}
+
 // adding data functions
 //
 update_bit_pos update_pos;
 void add_alt(rf_data packet, float alt) {
     packet->data.alt = alt;
     update_pos = ALT;
-    packet->data.update_mask |= 2^update_pos; //bit 0
+    packet->data.update_mask |= 1<<update_pos; //bit 0
 }
 
 void add_lat(rf_data packet, float lat) {
     packet->data.lat = lat;
     update_pos = LAT;
-    packet->data.update_mask |= 2^update_pos; //bit 1
+    packet->data.update_mask |= 1<<update_pos; //bit 1
 }
 
 void add_long(rf_data packet, float lon) {
     packet->data.lon = lon;
     update_pos = LONG;
-    packet->data.update_mask |= 2^update_pos; //bit 2
+    packet->data.update_mask |= 1<<update_pos; //bit 2
 }
 
 void add_alt_gps(rf_data packet, float alt) {
     packet->data.alt_gps = alt;
     update_pos = ALTGPS;
-    packet->data.update_mask |= 2^update_pos; //bit 3
+    packet->data.update_mask |= 1<<update_pos; //bit 3
 }
 
 void add_200g_accel(rf_data packet, int x, int y, int z) {
@@ -89,7 +118,7 @@ void add_200g_accel(rf_data packet, int x, int y, int z) {
     packet->data.y200g = y;
     packet->data.z200g = z;
     update_pos = A200G;
-    packet->data.update_mask |= 2^update_pos; //bit 4
+    packet->data.update_mask |= 1<<update_pos; //bit 4
 }
 
 void add_16g_accel(rf_data packet, float x, float y, float z) {
@@ -97,7 +126,7 @@ void add_16g_accel(rf_data packet, float x, float y, float z) {
     packet->data.y16g = y;
     packet->data.z16g = z;
     update_pos = A16G;
-    packet->data.update_mask |= 2^update_pos; //bit 5
+    packet->data.update_mask |= 1<<update_pos; //bit 5
 }
 
 void add_16_mag(rf_data packet, float x, float y, float z) {
@@ -105,53 +134,185 @@ void add_16_mag(rf_data packet, float x, float y, float z) {
     packet->data.y16mag = y;
     packet->data.z16mag = z;
     update_pos = MAG16G;
-    packet->data.update_mask |= 2^update_pos; //bit 6
+    packet->data.update_mask |= 1<<update_pos; //bit 6
 }
 
 void add_pitch(rf_data packet, float pitch) {
     packet->data.pitch = pitch;
     update_pos = PITCH;
-    packet->data.update_mask |= 2^PITCH; //bit 7
+    packet->data.update_mask |= 1<<PITCH; //bit 7
 }
 
 void add_roll(rf_data packet, float roll) {
     packet->data.roll = roll;
     update_pos = ROLL;
-    packet->data.update_mask |= 2^update_pos; //bit 8
+    packet->data.update_mask |= 1<<update_pos; //bit 8
 }
 
 void add_uptime(rf_data packet, int seconds) {
     packet->data.uptime = seconds;
     update_pos = UPTIME;
-    packet->data.update_mask |= 2^UPTIME; //bit 9
+    packet->data.update_mask |= 1<<UPTIME; //bit 9
 }
 
 void add_time_since_accel(rf_data packet, int seconds) {
     packet->data.time_since_accel = seconds;
     update_pos = TIMEACCEL;
-    packet->data.update_mask |= 2^update_pos; //bit 10
+    packet->data.update_mask |= 1<<update_pos; //bit 10
 }
 
 void add_temp1(rf_data packet, int temp) {
     packet->data.temp1 = temp;
     update_pos = TEMP1;
-    packet->data.update_mask |= 2^update_pos; //bit 11
+    packet->data.update_mask |= 1<<update_pos; //bit 11
 }
 
 void add_temp2(rf_data packet, int temp) {
     packet->data.temp2 = temp;
     update_pos = TEMP2;
-    packet->data.update_mask |= 2^update_pos; //bit 12
+    packet->data.update_mask |= 1<<update_pos; //bit 12
 }
 
 // charges ordered from 0-3
-void set_charge(rf_data, int charge, _Bool active) {
+void set_charge(rf_data packet, int charge, _Bool active) {
     uint8_t mask = 1 << charge;
     packet->data.charges |= mask;
     update_pos = CHARGES;
-    packet->data.update_mask |= 2^update_pos;
+    packet->data.update_mask |= 1<<update_pos; //bit 13
 }
 
 // retrieving data functions
-//
-//TODO
+// could just access data directly to reduce function overhead
+float get_alt(rf_data packet) {
+    return packet->data.alt;
+}
+
+float get_lat(rf_data packet) {
+    return packet->data.lat;
+}
+
+float get_long(rf_data packet) {
+    return packet->data.lon;
+}
+
+float get_alt_gps(rf_data packet) {
+    return packet->data.alt_gps;
+}
+
+int get_200g_x(rf_data packet) {
+    return packet->data.x200g;
+}
+
+int get_200g_y(rf_data packet) {
+    return packet->data.y200g;
+}
+
+int get_200g_z(rf_data packet) {
+    return packet->data.z200g;
+}
+
+float get_16g_x(rf_data packet) {
+    return packet->data.x16g;
+}
+
+float get_16g_y(rf_data packet) {
+    return packet->data.y16g;
+}
+
+float get_16g_z(rf_data packet) {
+    return packet->data.z16g;
+}
+
+float get_16mag_x(rf_data packet) {
+    return packet->data.x16mag;
+}
+
+float get_16mag_y(rf_data packet) {
+    return packet->data.y16mag;
+}
+
+float get_16mag_z(rf_data packet) {
+    return packet->data.z16mag;
+}
+
+float get_pitch(rf_data packet) {
+    return packet->data.pitch;
+}
+
+float get_roll(rf_data packet) {
+    return packet->data.roll;
+}
+
+int get_uptime(rf_data packet) {
+    return packet->data.uptime;
+}
+
+int get_time_since_accel(rf_data packet) {
+    return packet->data.time_since_accel;
+}
+
+int get_temp1(rf_data packet) {
+    return packet->data.temp1;
+}
+
+int get_temp2(rf_data packet) {
+    return packet->data.temp2;
+}
+
+_Bool get_charge1(rf_data packet) {
+    return packet->data.charges & 0b1;
+}
+
+_Bool get_charge2(rf_data packet) {
+    return packet->data.charges & 0b10;
+}
+
+_Bool get_charge3(rf_data packet) {
+    return packet->data.charges & 0b100;
+}
+
+_Bool get_charge4(rf_data packet) {
+    return packet->data.charges & 0b1000;
+}
+
+#ifdef DEBUG
+// function will change based on format of struct
+// most data types reversed if on little endian system
+// the update mask if set to print correctly in little endian systems
+void print_packet(const char *s) {
+    printf("start: %c\n", (unsigned int) *s);
+    printf("update: %02x%02x\n", *(s+2), *(s+1));
+    int i = 3;
+    while(i < 80) {
+        if((i-3)%4 == 0) {
+            if(i < 10) { //add extra space
+                printf("%d:  ", i);
+            } else {
+                printf("%d: ", i);
+            }
+        }
+        printf("%02x ", (unsigned int) *(s+i));
+        i++;
+        if((i+1)%4 == 0) {
+            printf("\n");
+        }
+    }
+    printf("\n\n");
+}
+
+int main() {
+    rf_data packet = create_packet();
+    clear_packet(packet);
+    add_temp1(packet, 0x11111111);
+    add_alt(packet, 0x11111111);
+
+    printf("%04x\n", packet->data.update_mask);
+
+    print_packet(packet->serialized);
+
+    reduce_packet(packet);
+    printf("\n");
+    print_packet(packet->serialized);
+}
+
+#endif

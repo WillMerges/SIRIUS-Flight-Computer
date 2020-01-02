@@ -1,5 +1,10 @@
 #ifndef RF_PACKET_H
 #define RF_PACKET_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #include <stdint.h>
 
@@ -15,7 +20,7 @@ struct rf_data_s {};
 
 union rf_data_u {
     struct rf_data_s data;
-    char serialized[sizeof(struct rf_data_s)];
+    uint8_t serialized[sizeof(struct rf_data_s)];
 };
 
 typedef union rf_data_u* rf_data;
@@ -65,5 +70,9 @@ _Bool get_charge1(rf_data);
 _Bool get_charge2(rf_data);
 _Bool get_charge3(rf_data);
 _Bool get_charge4(rf_data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
