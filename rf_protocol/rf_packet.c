@@ -32,11 +32,6 @@ struct rf_data_s {
 // ex. alt is bit 0 (least significant)
 // if bit is a 1, the data was updated, if it's a 0 it was not
 
-union rf_data_u {
-    struct rf_data_s data;
-    char serialized[sizeof(struct rf_data_s)];
-};
-
 #define RF_DATA_PACKET
 #include "rf_packet.h"
 

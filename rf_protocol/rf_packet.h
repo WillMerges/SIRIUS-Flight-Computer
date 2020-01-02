@@ -14,8 +14,13 @@
 //TODO finish these
 
 #ifndef RF_DATA_PACKET
-union rf_data_u {};
+struct rf_data_s {};
 #endif
+
+union rf_data_u {
+    struct rf_data_s data;
+    char serialized[sizeof(struct rf_data_s)];
+};
 
 typedef union rf_data_u* rf_data;
 
