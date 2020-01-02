@@ -3,26 +3,25 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+// rightward carrot!
+#define START_BYTE 0x3E
+
 #ifndef RF_DATA_PACKET
-struct rf_data{};
+union rf_data_u {};
 #endif
 
-union rf_data_u {
-    struct rf_data_s data_packet;
-    char* serialized_packet;
-};
-size_t packet_size = sizeof(union rf_data_u);
 typedef union rf_data_u* rf_data;
 
-// functions for creating a packet to send
-// returns modified rf_pointer, should never move
+// general functions
 rf_data create_packet();
+rf_data destroy_packet(rf_data);
+rf_data clear_packet(rf_data);
+
+// functions that add data to packet
 rf_data add_alt(float alt);
 rf_data add_lat(float lat);
 rf_data add_long(float lon);
 rf_data add_alt_gps(float alt);
-rf_data add_lat_gps(float lat);
-rf_data add_long_gps(float lon);
 rf_data add_200g_accel(int x, int y, int z);
 rf_data add_16g_accel(float x, float y, float z);
 rf_data add_16_mag(float x, float y, float z);
@@ -36,16 +35,12 @@ rf_data set_charge1(_Bool active);
 rf_data set_charge2(_Bool active);
 rf_data set_charge3(_Bool active);
 rf_data set_charge4(_Bool active);
-char* serialize(rf_data); //return is NULL terminated string
 
-// functions that turn serial input into data
-rf_data deserialize(char* buffer); // just a helper function
-float get_alt(rf_data); //input could be rf_data type or char*
+// functions that get data from packet
+float get_alt(rf_data);
 float get_lat(rf_data);
 float get_long(rf_data);
 float get_alt_gps(rf_data);
-float get_lat_gps(rf_data);
-float get_long_gps(rf_data);
 int get_200g_x(rf_data);
 int get_200g_y(rf_data);
 int get_200g_z(rf_data);
