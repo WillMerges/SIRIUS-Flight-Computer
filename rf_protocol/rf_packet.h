@@ -8,8 +8,21 @@ extern "C" {
 #include <sys/types.h>
 #include <stdint.h>
 
-// rightward carrot!
+// define DEBUG in order to enable print statements
+// ex) gcc rf_protocol.c -d DEBUG
+
+/* carrot points to direction read bytes in
+*   > is big endian (read from l to r most to least significant)
+*   < is little endian
+*   default to little endian (like on x86 arch.)
+*   define BIG_ENDIAN in compilation if on big endian system
+*   ex) gcc rf_protocol.c -d BIG_ENDIAN
+*/
+#ifdef BIG_ENDIAN
 #define START_BYTE 0x3E
+#else
+#define START_BYTE 0x3C
+#endif
 
 typedef enum {ALT, LAT, LONG, ALTGPS, A200G, A16G, MAG16G, PITCH, \
               ROLL, UPTIME, TIMEACCEL, TEMP1, TEMP2, CHARGES} update_bit_pos;
