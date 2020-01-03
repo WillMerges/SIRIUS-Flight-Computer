@@ -48,7 +48,7 @@ typedef union rf_data_u* rf_data;
 
 // general functions
 rf_data create_packet();
-rf_data destroy_packet(rf_data);
+void destroy_packet(rf_data);
 rf_data clear_packet(rf_data);
 size_t reduce_packet(rf_data);
 rf_data decompress_packet(rf_data);

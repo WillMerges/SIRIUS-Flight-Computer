@@ -50,13 +50,14 @@ rf_data create_packet() {
 }
 
 rf_data clear_packet(rf_data packet) {
-    for(int i=0; i<sizeof(packet->data); i++) {
+    for(size_t i=0; i < sizeof(packet->data); i++) {
         packet->serialized[i] = 0;
     }
     packet->data.start_byte = START_BYTE;
+    return packet;
 }
 
-rf_data destroy_packet(rf_data packet) {
+void destroy_packet(rf_data packet) {
     free(packet);
 }
 
@@ -67,7 +68,7 @@ rf_data destroy_packet(rf_data packet) {
 size_t reduce_packet(rf_data packet) {
     int c = 3;
     int j = 0;
-    for(int i=3; i < sizeof(*packet); i+=4) {;
+    for(size_t i=3; i < sizeof(*packet); i+=4) {;
         if(packet->data.update_mask & (1 << j)) {
             if(i == 79) {
                 packet->serialized[c] = packet->serialized[i];
@@ -101,7 +102,7 @@ rf_data decompress_packet(rf_data packet) {
     swap->serialized[2] = packet->serialized[2];
     int c = 3;
     int j = 0;
-    for(int i=3; i<sizeof(union rf_data_u); i+=4) {
+    for(size_t i=3; i<sizeof(union rf_data_u); i+=4) {
         if(packet->data.update_mask & (1 << j)) {
             if(i == 79) {
                 swap->serialized[i] = packet->serialized[c];
@@ -224,7 +225,7 @@ void add_temp2(rf_data packet, int temp) {
 
 // charges ordered from 0-3
 void set_charge(rf_data packet, int charge, _Bool active) {
-    uint8_t mask = 1 << charge;
+    uint8_t mask = active << charge;
     packet->data.charges |= mask;
     update_pos = CHARGES;
     packet->data.update_mask |= 1<<update_pos; //bit 13
@@ -309,19 +310,19 @@ int get_temp2(rf_data packet) {
 }
 
 _Bool get_charge1(rf_data packet) {
-    return packet->data.charges & 0b1;
+    return packet->data.charges & 1; //0b1
 }
 
 _Bool get_charge2(rf_data packet) {
-    return packet->data.charges & 0b10;
+    return packet->data.charges & 2; //0b10
 }
 
 _Bool get_charge3(rf_data packet) {
-    return packet->data.charges & 0b100;
+    return packet->data.charges & 4; //0b100
 }
 
 _Bool get_charge4(rf_data packet) {
-    return packet->data.charges & 0b1000;
+    return packet->data.charges & 8; //0b1000
 }
 
 #ifdef DEBUG
