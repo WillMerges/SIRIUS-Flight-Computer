@@ -29,7 +29,9 @@ struct rf_data_s {
     int temp2;
     uint8_t charges : 4;
 };
-// each struct member is a bit in update_mask
+// each struct member has a bit in update_mask
+// any data with an xyz only has one bit however
+// assumed all xyz data is updated each time new data is added
 // ex. alt is bit 0 (least significant)
 // if bit is a 1, the data was updated, if it's a 0 it was not
 
