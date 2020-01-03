@@ -81,9 +81,48 @@ size_t reduce_packet(rf_data packet) {
         j++;
     }
 #ifdef DEBUG
-    printf("\npacket reduced to size: %d\n", c);
+    printf("packet reduced to %d bytes\n", c);
 #endif
     return c;
+}
+
+// "un reduce" a packet
+static rf_data swap = NULL;
+rf_data decompress_packet(rf_data packet) {
+    if(!swap) {
+        swap = calloc(sizeof(union rf_data_u), 1);
+        swap->serialized[0] = START_BYTE;
+    } else {
+        clear_packet(swap);
+    }
+    swap->serialized[1] = packet->serialized[1];
+    swap->serialized[2] = packet->serialized[2];
+    int c = 3;
+    int j = 0;
+    for(int i=3; i<sizeof(union rf_data_u); i+=4) {
+        if(packet->data.update_mask & (1 << j)) {
+            if(i == 79) {
+                swap->serialized[i] = packet->serialized[c];
+                c++;
+            } else {
+                memcpy(swap->serialized+i, packet->serialized+c, 4);
+                c+=4;
+            }
+        }
+        if(i == 19 || i == 31 || i == 43) {
+            i += 8;
+        }
+        j++;
+    }
+    void* temp = swap;
+    swap = packet;
+    return temp;
+}
+
+void cleanup_packet_lib() {
+    if(swap) {
+        free(swap);
+    }
 }
 
 // adding data functions
@@ -279,7 +318,8 @@ _Bool get_charge4(rf_data packet) {
 // function will change based on format of struct
 // most data types reversed if on little endian system
 // the update mask if set to print correctly in little endian systems
-void print_packet(const char *s) {
+void print_packet(const rf_data packet) {
+    char* s = (char*) packet;
     printf("start: %c\n", (unsigned int) *s);
     printf("update: %02x%02x\n", *(s+2), *(s+1));
     int i = 3;
@@ -308,11 +348,17 @@ int main() {
 
     printf("%04x\n", packet->data.update_mask);
 
-    print_packet(packet->serialized);
+    print_packet(packet);
 
     reduce_packet(packet);
     printf("\n");
-    print_packet(packet->serialized);
+    print_packet(packet);
+
+    rf_data ret = decompress_packet(packet);
+    print_packet(ret);
+
+    destroy_packet(ret);
+    cleanup_packet_lib();
 }
 
 #endif

@@ -29,6 +29,9 @@ typedef union rf_data_u* rf_data;
 rf_data create_packet();
 rf_data destroy_packet(rf_data);
 rf_data clear_packet(rf_data);
+size_t reduce_packet(rf_data);
+rf_data decompress_packet(rf_data);
+void cleanup_packet_lib();
 
 // functions that add data to packet
 void add_alt(rf_data, float alt);
