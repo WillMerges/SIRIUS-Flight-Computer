@@ -9,20 +9,28 @@ extern "C" {
 #include <stdint.h>
 
 // define DEBUG in order to enable print statements
-// ex) gcc rf_protocol.c -d DEBUG
+// ex) gcc rf_protocol.c -D DEBUG
 
-/* carrot points to direction read bytes in
+/*  Set the start byte of the packet to represent endianness of the system
+*   carrot points to direction read bytes in (most to least sig.)
 *   > is big endian (read from l to r most to least significant)
 *   < is little endian
-*   default to little endian (like on x86 arch.)
-*   define BIG_ENDIAN in compilation if on big endian system
-*   ex) gcc rf_protocol.c -d BIG_ENDIAN
+*   ? is unknown (this hopefully never occurs)
 */
-#ifdef BIG_ENDIAN
-#define START_BYTE 0x3E
-#else
-#define START_BYTE 0x3C
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+    #define START_BYTE 0x3E // >
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+    #define START_BYTE 0x3C // <
+#else // unknow endianness
+    #define START_BYTE 0x3F // ?
 #endif
+
+// TODO add support for translating packet from one endianness to another
+// ex) if received bytes from a big endian machine the data in the packet
+// would all be in reversed byte order
+// use the C "swab" functions from unistd.h
+// perhaps only include translation functions and leave the packet data as is
+// For this project it does not matter (ARM (teensy) and x86 (ground station) are both little endian)
 
 typedef enum {ALT, LAT, LONG, ALTGPS, A200G, A16G, MAG16G, PITCH, \
               ROLL, UPTIME, TIMEACCEL, TEMP1, TEMP2, CHARGES} update_bit_pos;
@@ -45,6 +53,8 @@ rf_data clear_packet(rf_data);
 size_t reduce_packet(rf_data);
 rf_data decompress_packet(rf_data);
 void cleanup_packet_lib();
+_Bool isLittleEndian(rf_data);
+_Bool isBigEndian(rf_data);
 
 // functions that add data to packet
 void add_alt(rf_data, float alt);

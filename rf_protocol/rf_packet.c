@@ -125,6 +125,14 @@ void cleanup_packet_lib() {
     }
 }
 
+_Bool isLittleEndian(rf_data packet) {
+    return packet->data.start_byte == '<';
+}
+
+_Bool isBigEndian(rf_data packet) {
+    return packet->data.start_byte == '>';
+}
+
 // adding data functions
 //
 update_bit_pos update_pos;
