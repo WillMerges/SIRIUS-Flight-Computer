@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <string.h>
 
+//TODO maybe add set updated functions
+
 #pragma pack(1)
 struct rf_data_s {
     uint8_t start_byte;
