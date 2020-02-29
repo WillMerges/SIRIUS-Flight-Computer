@@ -31,7 +31,7 @@
 
 #include "Arduino.h"
 
-#include <Wire.h>
+#include "Wire.h"
 
 #include "Adafruit_MPL3115A2.h"
 

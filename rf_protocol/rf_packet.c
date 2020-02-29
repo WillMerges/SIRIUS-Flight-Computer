@@ -27,7 +27,7 @@ struct rf_data_s {
     int time_since_accel;
     int temp1;
     int temp2;
-    uint8_t charges : 4;
+    uint8_t charges : 4; // potentially move this to front to pack better
 };
 // each struct member has a bit in update_mask
 // any data with an xyz only has one bit however
@@ -37,6 +37,9 @@ struct rf_data_s {
 
 #define RF_DATA_PACKET
 #include "rf_packet.h"
+
+// set packet size
+size_t packet_size = sizeof(union rf_data_u);
 
 // general functions
 //
@@ -62,7 +65,7 @@ void destroy_packet(rf_data packet) {
 }
 
 // the packet will NOT be able to be accessed after reducing
-// this functions should be changed if packet changes
+// this function should be changed if packet changes
 // modifies the serialized attribute
 // returns number of bytes packet is
 size_t reduce_packet(rf_data packet) {
@@ -78,9 +81,12 @@ size_t reduce_packet(rf_data packet) {
                 c += 4;
             }
         }
-        if(i == 19 || i == 31 || i == 43) {
+        //TODO test this bit
+        /**
+        if(i == 19 || i == 31 || i == 43) { //I think this breaks (only first 4 bytes are copied over (x value))
             i += 8;
         }
+        */
         j++;
     }
 #ifdef DEBUG
@@ -329,7 +335,7 @@ _Bool get_charge4(rf_data packet) {
 // function will change based on format of struct
 // most data types reversed if on little endian system
 // the update mask if set to print correctly in little endian systems
-void print_packet(const rf_data packet) {
+void print_packet(const rf_data const packet) {
     char* s = (char*) packet;
     printf("start: %c\n", (unsigned int) *s);
     printf("update: %02x%02x\n", *(s+2), *(s+1));
@@ -349,27 +355,6 @@ void print_packet(const rf_data packet) {
         }
     }
     printf("\n\n");
-}
-
-int main() {
-    rf_data packet = create_packet();
-    clear_packet(packet);
-    add_temp1(packet, 0x11111111);
-    add_alt(packet, 0x11111111);
-
-    printf("%04x\n", packet->data.update_mask);
-
-    print_packet(packet);
-
-    reduce_packet(packet);
-    printf("\n");
-    print_packet(packet);
-
-    rf_data ret = decompress_packet(packet);
-    print_packet(ret);
-
-    destroy_packet(ret);
-    cleanup_packet_lib();
 }
 
 #endif

@@ -13,7 +13,7 @@
  * products from Adafruit!
  *
  * Written by Kevin "KTOWN" Townsend for Adafruit Industries.
- * Edited by Will Merges   
+ * Edited by Will Merges
  *
  * BSD license, all text here must be included in any redistribution.
  *
@@ -23,7 +23,7 @@
 #define __MPL3115A2__
 
 #include "Arduino.h"
-#include <Wire.h>
+#include "Wire.h"
 
 #define MPL3115A2_ADDRESS (0x60) ///< default I2C address 1100000
 

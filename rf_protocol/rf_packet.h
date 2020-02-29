@@ -2,6 +2,8 @@
 #define RF_PACKET_H
 
 #ifdef __cplusplus
+#include <stdbool.h>
+typedef bool _Bool;
 extern "C" {
 #endif
 
@@ -32,6 +34,7 @@ extern "C" {
 // perhaps only include translation functions and leave the packet data as is
 // For this project it does not matter (ARM (teensy) and x86 (ground station) are both little endian)
 
+// this enum needs to be reordered if packet structure changes
 typedef enum {ALT, LAT, LONG, ALTGPS, A200G, A16G, MAG16G, PITCH, \
               ROLL, UPTIME, TIMEACCEL, TEMP1, TEMP2, CHARGES} update_bit_pos;
 
@@ -45,6 +48,7 @@ union rf_data_u {
 };
 
 typedef union rf_data_u* rf_data;
+extern size_t packet_size;
 
 // general functions
 rf_data create_packet();
@@ -96,6 +100,11 @@ _Bool get_charge1(rf_data);
 _Bool get_charge2(rf_data);
 _Bool get_charge3(rf_data);
 _Bool get_charge4(rf_data);
+
+//debug function
+#ifdef DEBUG
+void print_packet(const rf_data);
+#endif
 
 #ifdef __cplusplus
 }

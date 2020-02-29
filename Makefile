@@ -28,9 +28,9 @@
 # SOFTWARE.
 
 # set your MCU type here, or make command line `make MCU=MK20DX256`
-MCU=MK20DX256
+#MCU=MK20DX256
 #MCU=MKL26Z64
-#MCU=MK64FX512
+MCU=MK64FX512
 #MCU=MK66FX1M0
 
 # make it lower case
