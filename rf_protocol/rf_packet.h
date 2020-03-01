@@ -1,3 +1,7 @@
+/*
+Will Merges
+*/
+
 #ifndef RF_PACKET_H
 #define RF_PACKET_H
 
@@ -36,7 +40,7 @@ extern "C" {
 
 // this enum needs to be reordered if packet structure changes
 typedef enum {ALT, LAT, LONG, ALTGPS, A200G, A16G, MAG16G, PITCH, \
-              ROLL, UPTIME, TIMEACCEL, TEMP1, TEMP2, CHARGES} update_bit_pos;
+              ROLL, UPTIME, TIMEACCEL, TEMP1, TEMP2, CHARGES, CONTINUITY} update_bit_pos;
 
 // no longer necessary, not hiding struct implementation (moved to h file)
 //#ifndef RF_DATA_PACKET
@@ -66,7 +70,9 @@ struct rf_data_s {
     int time_since_accel;
     int temp1;
     int temp2;
-    uint8_t charges : 4; // potentially move this to front to pack better
+    // potentially move this to front to pack better
+    uint8_t charges : 4; //deployed charges
+    uint8_t continuity : 4;
 };
 // each struct member has a bit in update_mask
 // any data with an xyz only has one bit however
@@ -108,6 +114,7 @@ void add_time_since_accel(rf_data, int seconds);
 void add_temp1(rf_data, int temp);
 void add_temp2(rf_data, int temp);
 void set_charge(rf_data, int charge, _Bool active);
+void set_continuity(rf_data, int charge, _Bool has_continuity);
 
 // functions that edit the update field of the packet
 void set_alt_change(rf_data);
@@ -148,6 +155,10 @@ _Bool get_charge1(rf_data);
 _Bool get_charge2(rf_data);
 _Bool get_charge3(rf_data);
 _Bool get_charge4(rf_data);
+_Bool get_continuity1(rf_data);
+_Bool get_continuity2(rf_data);
+_Bool get_continuity3(rf_data);
+_Bool get_continuity4(rf_data);
 
 //debug function
 #ifdef DEBUG

@@ -1,8 +1,12 @@
+/*
+Will Merges
+*/
 #define DEBUG
 
 #include "Arduino.h"
 #include "Adafruit_MPL3115A2.h"
 #include "rf_protocol/rf_packet.h"
+#include "charge.h"
 
 #define BAUD 9600
 #define xbee Serial4 // what serial the xbee radio is connected to
@@ -20,10 +24,12 @@ uint64_t temptime2 = 0;
 // create static memory variables
 rf_data packet;
 extern size_t packet_size;
+_Bool reduced = false; //guard for interrupts
 Adafruit_MPL3115A2 alt2;
 uint32_t uptime = 0; //number of time deltas that have passed
 IntervalTimer uptimer;
 IntervalTimer sendtimer;
+Charge charges[4] {1,2,3,4};
 
 //TODO check for roll over
 // is that necessary?
@@ -38,6 +44,7 @@ void update_clock() {
 //TODO maybe implement a sample rate (in main loop, interrupts probably too slow)
 // sample devices for data
 void sample() {
+    reduced = false;
     if(alt2.getAltitude(&packet->data.alt) == READ_SUCCESS) {
         set_alt_change(packet);
     }
@@ -46,6 +53,7 @@ void sample() {
 // send data over radio
 void send() {
     reduce_packet(packet);
+    reduced = true;
     xbee.write(packet->serialized, packet_size);
 #ifndef TEENSY3
     temptime2 = millis();

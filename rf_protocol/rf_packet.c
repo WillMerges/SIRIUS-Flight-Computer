@@ -1,3 +1,7 @@
+/*
+Will Merges
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -269,6 +273,14 @@ void set_charge(rf_data packet, int charge, _Bool active) {
     packet->data.update_mask |= 1<<update_pos; //bit 13
 }
 
+// continuity of charges ordered from 0-3
+void set_continuity(rf_data packet, int charge, _Bool continuous) {
+    uint8_t mask = continuous << charge;
+    packet->data.continuity |= mask;
+    update_pos = CONTINUITY;
+    packet->data.update_mask |= 1<<update_pos; //bit 13
+}
+
 // retrieving data functions
 // could just access data directly to reduce function overhead
 float get_alt(rf_data packet) {
@@ -361,6 +373,22 @@ _Bool get_charge3(rf_data packet) {
 
 _Bool get_charge4(rf_data packet) {
     return packet->data.charges & 8; //0b1000
+}
+
+_Bool get_continuity1(rf_data packet) {
+    return packet->data.continuity & 1; //0b1
+}
+
+_Bool get_continuity2(rf_data packet) {
+    return packet->data.continuity & 2; //0b10
+}
+
+_Bool get_continuity3(rf_data packet) {
+    return packet->data.continuity & 4; //0b100
+}
+
+_Bool get_continuity4(rf_data packet) {
+    return packet->data.continuity & 8; //0b1000
 }
 
 #ifdef DEBUG
