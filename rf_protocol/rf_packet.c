@@ -4,39 +4,6 @@
 #include <sys/types.h>
 #include <string.h>
 
-//TODO maybe add set updated functions
-
-#pragma pack(1)
-struct rf_data_s {
-    uint8_t start_byte;
-    uint16_t update_mask : 14;
-    float alt;
-    float lat;
-    float lon;
-    float alt_gps;
-    int x200g;
-    int y200g;
-    int z200g;
-    float x16g;
-    float y16g;
-    float z16g;
-    float x16mag;
-    float y16mag;
-    float z16mag;
-    float pitch;
-    float roll;
-    int uptime;
-    int time_since_accel;
-    int temp1;
-    int temp2;
-    uint8_t charges : 4; // potentially move this to front to pack better
-};
-// each struct member has a bit in update_mask
-// any data with an xyz only has one bit however
-// assumed all xyz data is updated each time new data is added
-// ex. alt is bit 0 (least significant)
-// if bit is a 1, the data was updated, if it's a 0 it was not
-
 #define RF_DATA_PACKET
 #include "rf_packet.h"
 
@@ -66,6 +33,7 @@ void destroy_packet(rf_data packet) {
     free(packet);
 }
 
+//TODO test this function!
 // the packet will NOT be able to be accessed after reducing
 // this function should be changed if packet changes
 // modifies the serialized attribute
@@ -78,17 +46,14 @@ size_t reduce_packet(rf_data packet) {
             if(i == 79) {
                 packet->serialized[c] = packet->serialized[i];
                 c++;
+            } else if(i == 19 || i == 31 || i == 43) {
+                memcpy(packet->serialized+c, packet->serialized+i, 12);
+                i += 8;
             } else { //this might break if endianness switches
                 memcpy(packet->serialized+c, packet->serialized+i, 4);
                 c += 4;
             }
         }
-        //TODO test this bit
-        /**
-        if(i == 19 || i == 31 || i == 43) { //I think this breaks (only first 4 bytes are copied over (x value))
-            i += 8;
-        }
-        */
         j++;
     }
 #ifdef DEBUG
@@ -153,8 +118,18 @@ void add_alt(rf_data packet, float alt) {
     packet->data.update_mask |= 1<<update_pos; //bit 0
 }
 
+void set_alt_change(rf_data packet) {
+    update_pos = ALT;
+    packet->data.update_mask |= 1<<update_pos; //bit 0
+}
+
 void add_lat(rf_data packet, float lat) {
     packet->data.lat = lat;
+    update_pos = LAT;
+    packet->data.update_mask |= 1<<update_pos; //bit 1
+}
+
+void set_lat_change(rf_data packet) {
     update_pos = LAT;
     packet->data.update_mask |= 1<<update_pos; //bit 1
 }
@@ -165,8 +140,18 @@ void add_long(rf_data packet, float lon) {
     packet->data.update_mask |= 1<<update_pos; //bit 2
 }
 
+void set_long_change(rf_data packet) {
+    update_pos = LONG;
+    packet->data.update_mask |= 1<<update_pos; //bit 2
+}
+
 void add_alt_gps(rf_data packet, float alt) {
     packet->data.alt_gps = alt;
+    update_pos = ALTGPS;
+    packet->data.update_mask |= 1<<update_pos; //bit 3
+}
+
+void set_altgps_change(rf_data packet) {
     update_pos = ALTGPS;
     packet->data.update_mask |= 1<<update_pos; //bit 3
 }
@@ -179,10 +164,20 @@ void add_200g_accel(rf_data packet, int x, int y, int z) {
     packet->data.update_mask |= 1<<update_pos; //bit 4
 }
 
+void set_200gccel_change(rf_data packet) {
+    update_pos = A200G;
+    packet->data.update_mask |= 1<<update_pos; //bit 4
+}
+
 void add_16g_accel(rf_data packet, float x, float y, float z) {
     packet->data.x16g = x;
     packet->data.y16g = y;
     packet->data.z16g = z;
+    update_pos = A16G;
+    packet->data.update_mask |= 1<<update_pos; //bit 5
+}
+
+void set_16gaccel_change(rf_data packet) {
     update_pos = A16G;
     packet->data.update_mask |= 1<<update_pos; //bit 5
 }
@@ -195,8 +190,18 @@ void add_16_mag(rf_data packet, float x, float y, float z) {
     packet->data.update_mask |= 1<<update_pos; //bit 6
 }
 
+void set_16mag_change(rf_data packet) {
+    update_pos = MAG16G;
+    packet->data.update_mask |= 1<<update_pos; //bit 6
+}
+
 void add_pitch(rf_data packet, float pitch) {
     packet->data.pitch = pitch;
+    update_pos = PITCH;
+    packet->data.update_mask |= 1<<PITCH; //bit 7
+}
+
+void set_pitch_change(rf_data packet) {
     update_pos = PITCH;
     packet->data.update_mask |= 1<<PITCH; //bit 7
 }
@@ -207,8 +212,18 @@ void add_roll(rf_data packet, float roll) {
     packet->data.update_mask |= 1<<update_pos; //bit 8
 }
 
+void set_roll_change(rf_data packet) {
+    update_pos = ROLL;
+    packet->data.update_mask |= 1<<update_pos; //bit 8
+}
+
 void add_uptime(rf_data packet, int seconds) {
     packet->data.uptime = seconds;
+    update_pos = UPTIME;
+    packet->data.update_mask |= 1<<UPTIME; //bit 9
+}
+
+void set_uptime_change(rf_data packet) {
     update_pos = UPTIME;
     packet->data.update_mask |= 1<<UPTIME; //bit 9
 }
@@ -219,14 +234,29 @@ void add_time_since_accel(rf_data packet, int seconds) {
     packet->data.update_mask |= 1<<update_pos; //bit 10
 }
 
+void set_uptimeaccel_change(rf_data packet) {
+    update_pos = TIMEACCEL;
+    packet->data.update_mask |= 1<<update_pos; //bit 10
+}
+
 void add_temp1(rf_data packet, int temp) {
     packet->data.temp1 = temp;
     update_pos = TEMP1;
     packet->data.update_mask |= 1<<update_pos; //bit 11
 }
 
+void set_temp1_change(rf_data packet) {
+    update_pos = TEMP1;
+    packet->data.update_mask |= 1<<update_pos; //bit 11
+}
+
 void add_temp2(rf_data packet, int temp) {
     packet->data.temp2 = temp;
+    update_pos = TEMP2;
+    packet->data.update_mask |= 1<<update_pos; //bit 12
+}
+
+void set_temp2_change(rf_data packet) {
     update_pos = TEMP2;
     packet->data.update_mask |= 1<<update_pos; //bit 12
 }

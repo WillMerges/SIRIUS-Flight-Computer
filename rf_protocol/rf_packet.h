@@ -38,9 +38,42 @@ extern "C" {
 typedef enum {ALT, LAT, LONG, ALTGPS, A200G, A16G, MAG16G, PITCH, \
               ROLL, UPTIME, TIMEACCEL, TEMP1, TEMP2, CHARGES} update_bit_pos;
 
-#ifndef RF_DATA_PACKET
-struct rf_data_s {};
-#endif
+// no longer necessary, not hiding struct implementation (moved to h file)
+//#ifndef RF_DATA_PACKET
+//struct rf_data_s {};
+//#endif
+
+#pragma pack(1)
+struct rf_data_s {
+    uint8_t start_byte; //0
+    uint16_t update_mask : 14; //1-2
+    float alt; //3-6
+    float lat; //7-10
+    float lon; //11-14
+    float alt_gps; //15-18
+    int x200g; //19-22
+    int y200g; //23-26
+    int z200g;
+    float x16g;
+    float y16g;
+    float z16g;
+    float x16mag;
+    float y16mag;
+    float z16mag;
+    float pitch;
+    float roll;
+    int uptime;
+    int time_since_accel;
+    int temp1;
+    int temp2;
+    uint8_t charges : 4; // potentially move this to front to pack better
+};
+// each struct member has a bit in update_mask
+// any data with an xyz only has one bit however
+// assumed all xyz data is updated each time new data is added
+// ex. alt is bit 0 (least significant)
+// if bit is a 1, the data was updated, if it's a 0 it was not
+
 
 union rf_data_u {
     struct rf_data_s data;
@@ -75,6 +108,21 @@ void add_time_since_accel(rf_data, int seconds);
 void add_temp1(rf_data, int temp);
 void add_temp2(rf_data, int temp);
 void set_charge(rf_data, int charge, _Bool active);
+
+// functions that edit the update field of the packet
+void set_alt_change(rf_data);
+void set_lat_change(rf_data);
+void set_long_change(rf_data);
+void set_altgps_change(rf_data);
+void set_200gccel_change(rf_data);
+void set_16gaccel_change(rf_data);
+void set_16mag_change(rf_data);
+void set_pitch_change(rf_data);
+void set_roll_change(rf_data);
+void set_uptime_change(rf_data);
+void set_uptimeaccel_change(rf_data);
+void set_temp1_change(rf_data);
+void set_temp2_change(rf_data);
 
 // functions that get data from packet
 float get_alt(rf_data);
