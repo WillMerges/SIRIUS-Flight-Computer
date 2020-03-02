@@ -11,7 +11,7 @@ Will Merges
 #define BAUD 9600
 #define xbee Serial4 // what serial the xbee radio is connected to
 
-#ifdef TEENSY3
+#ifdef INTERVAL_INTERRUPT
 #define DELTA_TIME 10^6 //in microseconds
 #define SEND_PERIOD 10^6 / 5 //every period (microseconds) to send data
 #else
@@ -36,7 +36,7 @@ Charge charges[4] {1,2,3,4};
 void update_clock() {
    packet->data.uptime = uptime++;
    set_uptime_change(packet);
-#ifndef TEENSY3
+#ifndef INTERVAL_INTERRUPT
     temptime = millis();
 #endif
 }
@@ -55,7 +55,7 @@ void send() {
     reduce_packet(packet);
     reduced = true;
     xbee.write(packet->serialized, packet_size);
-#ifndef TEENSY3
+#ifndef INTERVAL_INTERRUPT
     temptime2 = millis();
 #endif
 }
@@ -64,7 +64,7 @@ void init() {
     xbee.begin(BAUD);
     alt2.begin();
     packet = create_packet();
-#ifdef TEENSY3
+#ifdef INTERVAL_INTERRUPT
     uptimer.begin(&update_clock, DELTA_TIME);
     sendtimer.begin(&send, SEND_PERIOD);
 #else
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     init();
     while(1) {
         sample();
-#ifndef TEENSY3
+#ifndef INTERVAL_INTERRUPT
         if(millis() - temptime >= DELTA_TIME) {
             update_clock();
         }
