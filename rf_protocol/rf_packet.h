@@ -57,20 +57,21 @@ struct rf_data_s {
     float alt_gps; //15-18
     int x200g; //19-22
     int y200g; //23-26
-    int z200g;
-    float x16g;
-    float y16g;
-    float z16g;
-    float x16mag;
-    float y16mag;
-    float z16mag;
-    float pitch;
-    float roll;
-    uint32_t uptime;
-    uint32_t time_since_accel;
-    int temp1;
-    int temp2;
-    // potentially move this to front to pack better
+    int z200g; //27-30
+    float x16g; //31-34
+    float y16g; //35-38
+    float z16g; //39-42
+    float x16mag; //43-46
+    float y16mag; //47-50
+    float z16mag; //50-53
+    float pitch; //54-57
+    float roll; //58-61
+    uint32_t uptime; //62-65
+    uint32_t time_since_accel; //66-69
+    int temp1; //70-73
+    int temp2; //74-77
+    // potentially move this to front to pack better, not divisible by 4, doesnt matter currently
+    // (bytes 78-81)
     uint8_t charges : 4; //deployed charges (0-3)
     uint8_t continuity : 4; //continuity of charges (0-3)
 };
