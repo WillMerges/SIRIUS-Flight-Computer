@@ -160,7 +160,7 @@ void set_altgps_change(rf_data packet) {
     packet->data.update_mask |= 1<<update_pos; //bit 3
 }
 
-void add_200g_accel(rf_data packet, int x, int y, int z) {
+void add_200g_accel(rf_data packet, float x, float y, float z) {
     packet->data.x200g = x;
     packet->data.y200g = y;
     packet->data.z200g = z;
@@ -168,7 +168,7 @@ void add_200g_accel(rf_data packet, int x, int y, int z) {
     packet->data.update_mask |= 1<<update_pos; //bit 4
 }
 
-void set_200gccel_change(rf_data packet) {
+void set_200gaccel_change(rf_data packet) {
     update_pos = A200G;
     packet->data.update_mask |= 1<<update_pos; //bit 4
 }
@@ -299,15 +299,15 @@ float get_alt_gps(rf_data packet) {
     return packet->data.alt_gps;
 }
 
-int get_200g_x(rf_data packet) {
+float get_200g_x(rf_data packet) {
     return packet->data.x200g;
 }
 
-int get_200g_y(rf_data packet) {
+float get_200g_y(rf_data packet) {
     return packet->data.y200g;
 }
 
-int get_200g_z(rf_data packet) {
+float get_200g_z(rf_data packet) {
     return packet->data.z200g;
 }
 
@@ -375,6 +375,11 @@ _Bool get_charge4(rf_data packet) {
     return packet->data.charges & 8; //0b1000
 }
 
+// charges ordered 0-3
+_Bool get_charge(rf_data packet, int charge) {
+    return packet->data.charges & (1<<charge);
+}
+
 _Bool get_continuity1(rf_data packet) {
     return packet->data.continuity & 1; //0b1
 }
@@ -391,10 +396,15 @@ _Bool get_continuity4(rf_data packet) {
     return packet->data.continuity & 8; //0b1000
 }
 
+// charges ordered from 0-3
+_Bool get_continuity(rf_data packet, int charge) {
+    return packet->data.continuity & (1<<charge);
+}
+
 #ifdef DEBUG
 // function will change based on format of struct
 // most data types reversed if on little endian system
-// the update mask if set to print correctly in little endian systems
+// the update mask is set to print correctly in little endian systems
 void print_packet(const rf_data const packet) {
     char* s = (char*) packet;
     printf("start: %c\n", (unsigned int) *s);

@@ -1,6 +1,8 @@
 /*
 Will Merges
 */
+#ifndef CHARGE
+#define CHARGE
 
 #include "Arduino.h"
 
@@ -24,9 +26,14 @@ public:
     Charge(int charge_number);
     _Bool check_continuity();
     void deploy();
+    void arm();
+    void disarm();
+    _Bool deployed;
+    _Bool armed;
 private:
     uint8_t deploy_pin;
     uint8_t sense_pin;
     uint8_t indicator_pin;
-    _Bool deployed;
 };
+
+#endif

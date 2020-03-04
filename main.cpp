@@ -8,12 +8,16 @@ Will Merges
 #include "rf_protocol/rf_packet.h"
 #include "charge.h"
 #include "Adafruit_GPS.h"
+#include "ADXL377.h"
 
 // constants
 #define XBEE_BAUD 9600
 #define xbee Serial4
 #define GPS_BAUD 9600
 #define GPS_SERIAL Serial1
+#define ACCEL200GX_PIN 37
+#define ACCEL200GY_PIN 38
+#define ACCEL200GZ_PIN 39
 
 // determine whether to use watchdog
 #ifdef INTERVAL_INTERRUPT
@@ -37,6 +41,13 @@ IntervalTimer uptimer;
 IntervalTimer sendtimer;
 Charge charges[4] {1,2,3,4};
 Adafruit_GPS gps(&GPS_SERIAL);
+ADXL377 accel200g(ACCEL200GX_PIN, ACCEL200GY_PIN, ACCEL200GZ_PIN);
+
+// arming states
+enum arm_states {
+    ARMED, ARMED_NO_CHARGE, DISARMED
+};
+enum arm_states arm_state = DISARMED;
 
 // no need to check for overflow, the program will not be running for 136 years
 // if it is, i will likely be dead and not care
@@ -69,6 +80,10 @@ void sample() {
             add_alt_gps(packet, gps.altitude); // meters above mean sea level
         }
     }
+
+    //update 200g accel
+    accel200g.read(packet->data.x200g, packet->data.y200g, packet->data.z200g);
+    set_200gaccel_change(packet);
 
     // update charges
     for(int i=0; i < 4; i++) {

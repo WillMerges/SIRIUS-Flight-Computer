@@ -55,9 +55,9 @@ struct rf_data_s {
     float lat; //7-10
     float lon; //11-14
     float alt_gps; //15-18
-    int x200g; //19-22
-    int y200g; //23-26
-    int z200g; //27-30
+    float x200g; //19-22
+    float y200g; //23-26
+    float z200g; //27-30
     float x16g; //31-34
     float y16g; //35-38
     float z16g; //39-42
@@ -105,7 +105,7 @@ void add_alt(rf_data, float alt);
 void add_lat(rf_data, float lat);
 void add_long(rf_data, float lon);
 void add_alt_gps(rf_data, float alt);
-void add_200g_accel(rf_data, int x, int y, int z);
+void add_200g_accel(rf_data, float x, float y, float z);
 void add_16g_accel(rf_data, float x, float y, float z);
 void add_16_mag(rf_data, float x, float y, float z);
 void add_pitch(rf_data, float pitch);
@@ -137,9 +137,9 @@ float get_alt(rf_data);
 float get_lat(rf_data);
 float get_long(rf_data);
 float get_alt_gps(rf_data);
-int get_200g_x(rf_data);
-int get_200g_y(rf_data);
-int get_200g_z(rf_data);
+float get_200g_x(rf_data);
+float get_200g_y(rf_data);
+float get_200g_z(rf_data);
 float get_16g_x(rf_data);
 float get_16g_y(rf_data);
 float get_16g_z(rf_data);
@@ -156,10 +156,12 @@ _Bool get_charge1(rf_data);
 _Bool get_charge2(rf_data);
 _Bool get_charge3(rf_data);
 _Bool get_charge4(rf_data);
+_Bool get_charge(rf_data, int charge);
 _Bool get_continuity1(rf_data);
 _Bool get_continuity2(rf_data);
 _Bool get_continuity3(rf_data);
 _Bool get_continuity4(rf_data);
+_Bool get_continuity(rf_data, int charge);
 
 //debug function
 #ifdef DEBUG

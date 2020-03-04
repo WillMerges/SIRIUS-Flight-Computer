@@ -38,6 +38,16 @@ _Bool Charge::check_continuity() {
 }
 
 void Charge::deploy() {
-    digitalWriteFast(deploy_pin, HIGH);
-    deployed = true;
+    if(armed) {
+        digitalWriteFast(deploy_pin, HIGH);
+        deployed = true;
+    }
+}
+
+void Charge::arm() {
+    armed = true;
+}
+
+void Charge::disarm() {
+    armed = false;
 }
