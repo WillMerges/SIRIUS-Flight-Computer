@@ -66,13 +66,13 @@ struct rf_data_s {
     float z16mag;
     float pitch;
     float roll;
-    int uptime;
-    int time_since_accel;
+    uint32_t uptime;
+    uint32_t time_since_accel;
     int temp1;
     int temp2;
     // potentially move this to front to pack better
-    uint8_t charges : 4; //deployed charges
-    uint8_t continuity : 4;
+    uint8_t charges : 4; //deployed charges (0-3)
+    uint8_t continuity : 4; //continuity of charges (0-3)
 };
 // each struct member has a bit in update_mask
 // any data with an xyz only has one bit however
@@ -109,11 +109,11 @@ void add_16g_accel(rf_data, float x, float y, float z);
 void add_16_mag(rf_data, float x, float y, float z);
 void add_pitch(rf_data, float pitch);
 void add_roll(rf_data, float roll);
-void add_uptime(rf_data, int seconds);
-void add_time_since_accel(rf_data, int seconds);
+void add_uptime(rf_data, uint32_t seconds);
+void add_time_since_accel(rf_data, uint32_t seconds);
 void add_temp1(rf_data, int temp);
 void add_temp2(rf_data, int temp);
-void set_charge(rf_data, int charge, _Bool active);
+void set_charge(rf_data, int charge, _Bool active); //charges ordered 0-3
 void set_continuity(rf_data, int charge, _Bool has_continuity);
 
 // functions that edit the update field of the packet
@@ -121,7 +121,7 @@ void set_alt_change(rf_data);
 void set_lat_change(rf_data);
 void set_long_change(rf_data);
 void set_altgps_change(rf_data);
-void set_200gccel_change(rf_data);
+void set_200gaccel_change(rf_data);
 void set_16gaccel_change(rf_data);
 void set_16mag_change(rf_data);
 void set_pitch_change(rf_data);

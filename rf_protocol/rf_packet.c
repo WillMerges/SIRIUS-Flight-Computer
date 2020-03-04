@@ -221,7 +221,7 @@ void set_roll_change(rf_data packet) {
     packet->data.update_mask |= 1<<update_pos; //bit 8
 }
 
-void add_uptime(rf_data packet, int seconds) {
+void add_uptime(rf_data packet, uint32_t seconds) {
     packet->data.uptime = seconds;
     update_pos = UPTIME;
     packet->data.update_mask |= 1<<UPTIME; //bit 9
@@ -232,7 +232,7 @@ void set_uptime_change(rf_data packet) {
     packet->data.update_mask |= 1<<UPTIME; //bit 9
 }
 
-void add_time_since_accel(rf_data packet, int seconds) {
+void add_time_since_accel(rf_data packet, uint32_t seconds) {
     packet->data.time_since_accel = seconds;
     update_pos = TIMEACCEL;
     packet->data.update_mask |= 1<<update_pos; //bit 10
