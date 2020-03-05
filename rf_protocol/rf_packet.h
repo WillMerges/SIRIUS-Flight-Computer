@@ -68,8 +68,8 @@ struct rf_data_s {
     float roll; //58-61
     uint32_t uptime; //62-65
     uint32_t time_since_accel; //66-69
-    int temp1; //70-73
-    int temp2; //74-77
+    float temp1; //70-73
+    float temp2; //74-77
     // potentially move this to front to pack better, not divisible by 4, doesnt matter currently
     // (bytes 78-81)
     uint8_t charges : 4; //deployed charges (0-3)
@@ -107,13 +107,13 @@ void add_long(rf_data, float lon);
 void add_alt_gps(rf_data, float alt);
 void add_200g_accel(rf_data, float x, float y, float z);
 void add_16g_accel(rf_data, float x, float y, float z);
-void add_16_mag(rf_data, float x, float y, float z);
+void add_16g_mag(rf_data, float x, float y, float z);
 void add_pitch(rf_data, float pitch);
 void add_roll(rf_data, float roll);
 void add_uptime(rf_data, uint32_t seconds);
 void add_time_since_accel(rf_data, uint32_t seconds);
-void add_temp1(rf_data, int temp);
-void add_temp2(rf_data, int temp);
+void add_temp1(rf_data, float temp);
+void add_temp2(rf_data, float temp);
 void set_charge(rf_data, int charge, _Bool active); //charges ordered 0-3
 void set_continuity(rf_data, int charge, _Bool has_continuity);
 
@@ -124,7 +124,7 @@ void set_long_change(rf_data);
 void set_altgps_change(rf_data);
 void set_200gaccel_change(rf_data);
 void set_16gaccel_change(rf_data);
-void set_16mag_change(rf_data);
+void set_16gmag_change(rf_data);
 void set_pitch_change(rf_data);
 void set_roll_change(rf_data);
 void set_uptime_change(rf_data);
@@ -143,15 +143,15 @@ float get_200g_z(rf_data);
 float get_16g_x(rf_data);
 float get_16g_y(rf_data);
 float get_16g_z(rf_data);
-float get_16mag_x(rf_data);
-float get_16mag_y(rf_data);
-float get_16mag_z(rf_data);
+float get_16gmag_x(rf_data);
+float get_16gmag_y(rf_data);
+float get_16gmag_z(rf_data);
 float get_pitch(rf_data);
 float get_roll(rf_data);
 int get_uptime(rf_data);
 int get_time_since_accel(rf_data);
-int get_temp1(rf_data);
-int get_temp2(rf_data);
+float get_temp1(rf_data);
+float get_temp2(rf_data);
 _Bool get_charge1(rf_data);
 _Bool get_charge2(rf_data);
 _Bool get_charge3(rf_data);

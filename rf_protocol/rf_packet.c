@@ -186,7 +186,7 @@ void set_16gaccel_change(rf_data packet) {
     packet->data.update_mask |= 1<<update_pos; //bit 5
 }
 
-void add_16_mag(rf_data packet, float x, float y, float z) {
+void add_16g_mag(rf_data packet, float x, float y, float z) {
     packet->data.x16mag = x;
     packet->data.y16mag = y;
     packet->data.z16mag = z;
@@ -194,7 +194,7 @@ void add_16_mag(rf_data packet, float x, float y, float z) {
     packet->data.update_mask |= 1<<update_pos; //bit 6
 }
 
-void set_16mag_change(rf_data packet) {
+void set_16gmag_change(rf_data packet) {
     update_pos = MAG16G;
     packet->data.update_mask |= 1<<update_pos; //bit 6
 }
@@ -243,7 +243,7 @@ void set_uptimeaccel_change(rf_data packet) {
     packet->data.update_mask |= 1<<update_pos; //bit 10
 }
 
-void add_temp1(rf_data packet, int temp) {
+void add_temp1(rf_data packet, float temp) {
     packet->data.temp1 = temp;
     update_pos = TEMP1;
     packet->data.update_mask |= 1<<update_pos; //bit 11
@@ -254,7 +254,7 @@ void set_temp1_change(rf_data packet) {
     packet->data.update_mask |= 1<<update_pos; //bit 11
 }
 
-void add_temp2(rf_data packet, int temp) {
+void add_temp2(rf_data packet, float temp) {
     packet->data.temp2 = temp;
     update_pos = TEMP2;
     packet->data.update_mask |= 1<<update_pos; //bit 12
@@ -323,15 +323,15 @@ float get_16g_z(rf_data packet) {
     return packet->data.z16g;
 }
 
-float get_16mag_x(rf_data packet) {
+float get_16gmag_x(rf_data packet) {
     return packet->data.x16mag;
 }
 
-float get_16mag_y(rf_data packet) {
+float get_16gmag_y(rf_data packet) {
     return packet->data.y16mag;
 }
 
-float get_16mag_z(rf_data packet) {
+float get_16gmag_z(rf_data packet) {
     return packet->data.z16mag;
 }
 
@@ -351,11 +351,11 @@ int get_time_since_accel(rf_data packet) {
     return packet->data.time_since_accel;
 }
 
-int get_temp1(rf_data packet) {
+float get_temp1(rf_data packet) {
     return packet->data.temp1;
 }
 
-int get_temp2(rf_data packet) {
+float get_temp2(rf_data packet) {
     return packet->data.temp2;
 }
 
