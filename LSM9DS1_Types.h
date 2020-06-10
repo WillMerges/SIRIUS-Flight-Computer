@@ -1,0 +1,1 @@
+SparkFun_LSM9DS1_Arduino_Library/src/LSM9DS1_Types.h
